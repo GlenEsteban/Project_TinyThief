@@ -39,8 +39,6 @@ public class Movement : MonoBehaviour {
         }
         else {
             _rigidBody.velocity = Vector3.Lerp(_rigidBody.velocity, Vector3.zero,Time.deltaTime);
-            //Quaternion toRotation = Quaternion.LookRotation(_lastLookDirection, Vector3.up);
-            //transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, _moveRotationSpeed * Time.deltaTime);
         }
     }
 

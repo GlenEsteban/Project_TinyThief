@@ -4,10 +4,14 @@ public class BGMPlayer : MonoBehaviour {
     [SerializeField] AudioClip _bgmMain;
     [SerializeField] AudioClip _bgmChaseSequence;
 
-    private AudioSource _audioSource;
+    private AudioSource _audioSource;    
 
     private void Awake() {
         _audioSource = GetComponent<AudioSource>();
+    }
+
+    private void OnEnable() {
+        
     }
 
     private void Start() {
