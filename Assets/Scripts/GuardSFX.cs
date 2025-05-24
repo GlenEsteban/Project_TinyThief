@@ -11,6 +11,7 @@ public class GuardSFX : MonoBehaviour {
     }
 
     public void PlayAlertSFX() {
+        if (_audioSource.isPlaying) { return; }
         _audioSource.clip = _alertSFX;
         _audioSource.Play();
     }

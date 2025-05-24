@@ -66,7 +66,7 @@ public class GrabAbility : MonoBehaviour {
 
     private IEnumerator EnableStealingStatusTemporarily() {
         _isStealing = true;
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(.5f);
         _isStealing = false;
     }
 }

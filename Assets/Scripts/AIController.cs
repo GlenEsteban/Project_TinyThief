@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static UnityEditor.Progress;
@@ -21,10 +22,10 @@ public class AIController : MonoBehaviour {
     [SerializeField] private Transform _surveyingPoint;
     [SerializeField] private float _surveyingDuration = 15f;
 
-    [SerializeField] private BGMPlayer _bgmPlayer; // NOTE: Change how you reference this!!             <<< FIX CODE
     
     private GuardSFX _guardSFX;
     private AIMovement _aiMovement;
+    private EmoteUI _emoteUI;
 
     public bool _isInFOVDistance = false;
     public bool _isInFOVRangeThreshold = false;
@@ -60,6 +61,9 @@ public class AIController : MonoBehaviour {
         else {
             _currentPatrolPoint = _patrolPoints[0].position;
         }
+
+        _emoteUI = GetComponent<EmoteUI>();
+        _emoteUI.HideEmoteUI();
     }
 
     private void Update() {
@@ -136,18 +140,28 @@ public class AIController : MonoBehaviour {
             _checkForCrimeTimer = 0;
 
             if (!_isChasing && _player.GetIsStealing()) {
-                _isChasing = true;
                 _isPatrolling = false;
-
-                _bgmPlayer.PlayBGMChaseSequence();
+                _emoteUI.DisplayChaseEmote();
 
                 _guardSFX.PlayAlertSFX();
+
+                StartCoroutine(DelayChaseSequenceStart());
+
+                GameStateManager.Instance.AddGuardGivingChase(this);
             }
         }
     }
 
+    private IEnumerator DelayChaseSequenceStart() {
+        yield return new WaitForSeconds(1f);
+        _isChasing = true;
+        _isPatrolling = false;
+    }
+
     private void HandleChaseBehavior() {
         if (_canSeePlayer) {
+            _emoteUI.DisplayChaseEmote();
+
             _aiMovement.SetTargetDestination(_player.gameObject.transform.position);
 
             _aiMovement.SetIsFacingPlayer(true);
@@ -157,6 +171,8 @@ public class AIController : MonoBehaviour {
             _surveyingDurationTimer = 0;
         }
         else {
+            _emoteUI.DisplaySurveyingEmote();
+
             _isSurveying = true;
 
             _surveyingDurationTimer += Time.deltaTime;
@@ -192,13 +208,15 @@ public class AIController : MonoBehaviour {
         _isSurveying = false;
         _isPatrolling = true;
 
-        _bgmPlayer.PlayBGMMain();
+        _emoteUI.HideEmoteUI();
+
+        GameStateManager.Instance.RemoveGuardGivingChase(this);
     }
 
     private void HandlePatrollingBehavior() {
         if (!_isSurveying) {
             _aiMovement.SetTargetDestination(_currentPatrolPoint);
-            _hasReachedPatrolpoint = (_currentPatrolPoint - transform.position).magnitude < 3f;
+            _hasReachedPatrolpoint = (_currentPatrolPoint - transform.position).magnitude < _surveyingRange;
         }
 
         if (_hasReachedPatrolpoint) {
@@ -206,7 +224,7 @@ public class AIController : MonoBehaviour {
 
             HandleSurveyingBehavior(_currentPatrolPoint);
 
-            _surveyingDurationTimer += Time.deltaTime;
+            _surveyAtPatrolPointTimer += Time.deltaTime;
             if (_surveyAtPatrolPointTimer > _surveyAtPatrolPointDuration) {
                 GetNewRandomPatrolPoint();
             }
@@ -215,6 +233,7 @@ public class AIController : MonoBehaviour {
 
     private void GetNewRandomPatrolPoint() {
         Transform patrolPoint = _patrolPoints[UnityEngine.Random.Range(0, _patrolPoints.Count)];
+        _surveyAtPatrolPointTimer = 0;
         _currentPatrolPoint = patrolPoint.position;
         _isSurveying = false;
     }
