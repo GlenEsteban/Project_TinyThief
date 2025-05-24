@@ -8,41 +8,45 @@ public class AIController : MonoBehaviour {
     [SerializeField] private Transform _playerCenterPoint;
 
     [SerializeField] private float _fovDistance = 10f;
-    [SerializeField, Range(-1,1)] private float fovRangeThreshold = 0;
-    [SerializeField, Range(-1, 1)] private float _checkForCrimeRate= 0.2f;
+    [SerializeField, Range(-1, 1)] private float fovRangeThreshold = 0;
+    [SerializeField, Range(-1, 1)] private float _checkForCrimeRate = 0.2f;
     [SerializeField, Range(-1, 1)] private float _checkForFOVObstructionRate = 0.2f;
     [SerializeField] private Transform _FOVPoint;
 
     [SerializeField] private List<Transform> _patrolPoints = new List<Transform>();
+    [SerializeField] private float _surveyAtPatrolPointDuration = 5f;
 
     [SerializeField] private float _surveyingRate = 5f;
-    [SerializeField] private float _surveyingRange= 5f;
+    [SerializeField] private float _surveyingRange = 5f;
     [SerializeField] private Transform _surveyingPoint;
+    [SerializeField] private float _surveyingDuration = 15f;
 
     [SerializeField] private BGMPlayer _bgmPlayer; // NOTE: Change how you reference this!!             <<< FIX CODE
-
-
+    
     private GuardSFX _guardSFX;
     private AIMovement _aiMovement;
 
-
-    public bool _isInFOVDistance= false;
+    public bool _isInFOVDistance = false;
     public bool _isInFOVRangeThreshold = false;
     public bool _isFOVObstructed = false;
     public bool _canSeePlayer = false;
 
     public bool _isPatrolling = true;
+    public bool _hasReachedPatrolpoint = true;
     public bool _isChasing = false;
     public bool _isSurveying = false;
 
-
+    private float _surveyAtPatrolPointTimer = 0;
     private float _checkForCrimeTimer = 0;
     private float _checkForFOVObstructionTimer = 0;
-    private float _surveyingTimer = Mathf.Infinity;
+    private float _surveyingTimer = 0;
+    private float _surveyingDurationTimer = 0;
+
+
     private Vector3 _pointLastSeenPlayer;
-
-
     private Vector3 _directionToPlayer;
+    private Vector3 _currentPatrolPoint;
+
 
     private void Awake() {
         _guardSFX = GetComponent<GuardSFX>();
@@ -50,46 +54,49 @@ public class AIController : MonoBehaviour {
     }
 
     private void Start() {
-        if (_patrolPoints.Count == 0)
-        {
+        if (_patrolPoints.Count == 0) {
             _patrolPoints.Add(this.transform);
+        } 
+        else {
+            _currentPatrolPoint = _patrolPoints[0].position;
         }
     }
 
     private void Update() {
+        if (_isPatrolling) {
+            HandlePatrollingBehavior();
+        }
+
         if (_isChasing) {
             HandleChaseBehavior();
         }
 
         CheckIfPlayerInFOVDistance();
-
-        if (!_isInFOVDistance) { return; }
-
         CheckIfPlayerInFOVRangeThreshold();
-
-        if (!_isInFOVRangeThreshold) { return; }
-
         CheckForFOVObstruction();
 
-        if (!_isFOVObstructed) { return; }
+        if (_isInFOVDistance && _isInFOVRangeThreshold && !_isFOVObstructed) {
+            _canSeePlayer = true;
+        } else {
+            if (_canSeePlayer) {
+                _pointLastSeenPlayer = _player.transform.position;
+                _canSeePlayer = false;
+            }
+        }
 
-        CheckForCrime();
+        if (_canSeePlayer) {
+            CheckForCrime();
+        }
     }
 
     private void CheckIfPlayerInFOVDistance() {
         float distanceToPlayer = (_player.transform.position - transform.position).magnitude;
 
         if (distanceToPlayer < _fovDistance) {
-            print("in FOV Distance");
             _isInFOVDistance = true;
-            _canSeePlayer = true;
         }
         else {
             _isInFOVDistance = false;
-            _canSeePlayer = false;
-            _isSurveying = true;
-
-            EndChase();
         }
     }
 
@@ -97,13 +104,10 @@ public class AIController : MonoBehaviour {
         _directionToPlayer = (_player.transform.position - transform.position).normalized;
 
         if (Vector3.Dot(_directionToPlayer, transform.forward) > fovRangeThreshold) {
-            print("in FOV Range Threshold");
             _isInFOVRangeThreshold = true;
-            _canSeePlayer = true;
         }
         else {
             _isInFOVRangeThreshold = false;
-            _canSeePlayer = false;
         }
     }
 
@@ -116,17 +120,10 @@ public class AIController : MonoBehaviour {
             _directionToPlayer = (_playerCenterPoint.position - _FOVPoint.position).normalized;
             if (Physics.Raycast(_FOVPoint.position, _directionToPlayer, out hit)) {
                 if (hit.transform.gameObject == _player.gameObject) {
-                    print(hit.transform.name);
-                    _isFOVObstructed = true;
-                    _isSurveying = false;
-                    _canSeePlayer = true;
+                    _isFOVObstructed = false;
                 }
                 else {
-                    print(hit.transform.name);
-                    _isFOVObstructed = false;
-                    _canSeePlayer = false;
-
-                    _pointLastSeenPlayer = _player.transform.position;
+                    _isFOVObstructed = true;
                 }
             }
         }
@@ -140,9 +137,7 @@ public class AIController : MonoBehaviour {
 
             if (!_isChasing && _player.GetIsStealing()) {
                 _isChasing = true;
-                _aiMovement.SetIsFacingPlayer(true);
-
-                _surveyingTimer = Mathf.Infinity;
+                _isPatrolling = false;
 
                 _bgmPlayer.PlayBGMChaseSequence();
 
@@ -152,26 +147,44 @@ public class AIController : MonoBehaviour {
     }
 
     private void HandleChaseBehavior() {
-        if (!_isSurveying) {
+        if (_canSeePlayer) {
             _aiMovement.SetTargetDestination(_player.gameObject.transform.position);
+
+            _aiMovement.SetIsFacingPlayer(true);
+
+            _isSurveying = false;
+            _surveyingTimer = 0;
+            _surveyingDurationTimer = 0;
         }
-
-        if (!_isInFOVDistance || !_isInFOVRangeThreshold | !_isFOVObstructed) {            
+        else {
             _isSurveying = true;
-            _aiMovement.SetIsFacingPlayer(false);
 
-            _surveyingTimer += Time.deltaTime;
-            if (_surveyingTimer > _surveyingRate) {
-                HandleSurveyingBehavior();
-                _surveyingTimer = 0;
+            _surveyingDurationTimer += Time.deltaTime;
+            if (_surveyingDurationTimer > _surveyingDuration) {
+                EndChase();
             }
+
+            float distanceToPointLastSeenPlayer = (transform.position - _pointLastSeenPlayer).magnitude;
+            if (distanceToPointLastSeenPlayer >= _surveyingRange) {
+                _aiMovement.SetTargetDestination(_pointLastSeenPlayer);
+            }
+            else if (_isSurveying) {
+                HandleSurveyingBehavior(_pointLastSeenPlayer);
+            }
+
+            _aiMovement.SetIsFacingPlayer(false);
         }
     }
-    Vector3 randomVectorXZ;
-    private void HandleSurveyingBehavior() {
-        Vector2 randomPoint = UnityEngine.Random.insideUnitCircle * _surveyingRange;
-        Vector3 randomVectorXZ = new Vector3(randomPoint.x, 0f, randomPoint.y);
-        _aiMovement.SetTargetDestination(_pointLastSeenPlayer + randomVectorXZ);
+
+
+    private void HandleSurveyingBehavior(Vector3 surveyingPoint) {
+        _surveyingTimer += Time.deltaTime;
+        if (_surveyingTimer > _surveyingRate) {
+            Vector2 randomPoint = UnityEngine.Random.insideUnitCircle * _surveyingRange;
+            Vector3 randomVectorXZ = new Vector3(randomPoint.x, 0f, randomPoint.y);
+            _aiMovement.SetTargetDestination(surveyingPoint + randomVectorXZ);
+            _surveyingTimer = 0;
+        }
     }
 
     private void EndChase() {
@@ -182,12 +195,27 @@ public class AIController : MonoBehaviour {
         _bgmPlayer.PlayBGMMain();
     }
 
-    private void ChooseRandomPatrolPoint() {
-        Vector3 randomPatrolPoint = _patrolPoints[UnityEngine.Random.Range(0, _patrolPoints.Count)].position;
-        _aiMovement.SetTargetDestination(randomPatrolPoint);
+    private void HandlePatrollingBehavior() {
+        if (!_isSurveying) {
+            _aiMovement.SetTargetDestination(_currentPatrolPoint);
+            _hasReachedPatrolpoint = (_currentPatrolPoint - transform.position).magnitude < 3f;
+        }
+
+        if (_hasReachedPatrolpoint) {
+            _isSurveying = true;
+
+            HandleSurveyingBehavior(_currentPatrolPoint);
+
+            _surveyingDurationTimer += Time.deltaTime;
+            if (_surveyAtPatrolPointTimer > _surveyAtPatrolPointDuration) {
+                GetNewRandomPatrolPoint();
+            }
+        }
     }
 
-    private void HandlePatrollingBehavior() {
-
+    private void GetNewRandomPatrolPoint() {
+        Transform patrolPoint = _patrolPoints[UnityEngine.Random.Range(0, _patrolPoints.Count)];
+        _currentPatrolPoint = patrolPoint.position;
+        _isSurveying = false;
     }
 }
