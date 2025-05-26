@@ -201,17 +201,6 @@
                 },
                 {
                     "name": "",
-                    "id": "ca05db9b-1fbe-4b15-a033-bd32a430bc5f",
-                    "path": "<Mouse>/delta",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "6d1dadce-21af-4a40-90d9-f2b5b97f9114",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
@@ -236,6 +225,39 @@
                     "name": "",
                     "id": "1becef78-679f-4469-8bb9-2757c448dff2",
                     "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9f3f8e94-0c9a-4ddb-b7a9-c928d7944f12",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3abfd276-323a-49d7-9fe9-33a1b03a3108",
+                    "path": "<Keyboard>/upArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b55be286-f270-4a8b-8e27-8d0c5b1f18fa",
+                    "path": "<Keyboard>/downArrow",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
