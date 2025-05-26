@@ -33,6 +33,7 @@ public class GuardAIController : MonoBehaviour {
     public bool _isInControl = true;
 
     public bool _isPatrolling = true;
+    public bool _isSurveyingOnPatrol = true;
     public bool _hasReachedPatrolpoint = true;
     public bool _isChasing = false;
     public bool _isSurveying = false;
@@ -169,6 +170,7 @@ public class GuardAIController : MonoBehaviour {
     }
 
     private IEnumerator DelayChaseSequenceStart() {
+        _aiMovement.SetTargetDestination(transform.position);
         yield return new WaitForSeconds(1f);
         _isChasing = true;
         _isPatrolling = false;
@@ -238,7 +240,9 @@ public class GuardAIController : MonoBehaviour {
         if (_hasReachedPatrolpoint) {
             _isSurveying = true;
 
-            HandleSurveyingBehavior(_currentPatrolPoint);
+            if(_isSurveyingOnPatrol) {
+                HandleSurveyingBehavior(_currentPatrolPoint);
+            }
 
             _surveyAtPatrolPointTimer += Time.deltaTime;
             if (_surveyAtPatrolPointTimer > _surveyAtPatrolPointDuration) {

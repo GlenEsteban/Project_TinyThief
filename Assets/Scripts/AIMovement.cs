@@ -54,8 +54,4 @@ public class AIMovement : MonoBehaviour {
             }
         }
     }
-
-    internal void SetTargetDestination(object currentPatrolPoint) {
-        throw new NotImplementedException();
-    }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class VIllagerAIController : MonoBehaviour {
+public class VillagerAIController : MonoBehaviour {
     [SerializeField] private List<Transform> _patrolPoints = new List<Transform>();
     [SerializeField] private float _surveyAtPatrolPointDuration = 5f;
 

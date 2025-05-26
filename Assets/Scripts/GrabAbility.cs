@@ -35,6 +35,8 @@ public class GrabAbility : MonoBehaviour {
             GrabbableItem item = _pickupFrontDetector.GetFirstGrabbableItem();
             AddToInventory(item);
 
+            _coinCounter.AddToCoinCount(item.GetValue());
+
             _pickupFrontDetector.RemoveItem(item);
             _pickupGroundDetector.RemoveItem(item);
 
@@ -44,6 +46,7 @@ public class GrabAbility : MonoBehaviour {
         else if (_pickupGroundDetector.GetFirstGrabbableItem() != null) {
             GrabbableItem item = _pickupGroundDetector.GetFirstGrabbableItem();
             AddToInventory(item);
+
             _coinCounter.AddToCoinCount(item.GetValue());
 
             _pickupFrontDetector.RemoveItem(item);
