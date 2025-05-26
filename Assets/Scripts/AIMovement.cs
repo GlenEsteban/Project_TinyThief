@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
@@ -51,8 +52,10 @@ public class AIMovement : MonoBehaviour {
             else {
                 targetDirection = _navMeshAgent.velocity.normalized;
             }
-            //Quaternion toRotation = Quaternion.LookRotation(targetDirection, Vector3.up);
-            //transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, _moveRotationSpeed * Time.deltaTime);
         }
+    }
+
+    internal void SetTargetDestination(object currentPatrolPoint) {
+        throw new NotImplementedException();
     }
 }

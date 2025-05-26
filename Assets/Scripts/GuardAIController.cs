@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using static UnityEditor.Progress;
 
-public class AIController : MonoBehaviour {
+public class GuardAIController : MonoBehaviour {
     [SerializeField] private GrabAbility _player;
     [SerializeField] private Transform _playerCenterPoint;
 

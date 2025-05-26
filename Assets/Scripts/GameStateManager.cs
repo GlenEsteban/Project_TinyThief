@@ -16,13 +16,13 @@ public class GameStateManager : MonoBehaviour {
 
     [SerializeField] private SceneSFX _sceneSFX;
 
-    [SerializeField] private List<AIController> _guardsGivingChase = new List<AIController>();
+    [SerializeField] private List<GuardAIController> _guardsGivingChase = new List<GuardAIController>();
 
     [SerializeField] private GameObject _capturedUI;
     [SerializeField] private GameObject _gameOverUI;
 
 
-    public void AddGuardGivingChase(AIController guard) {
+    public void AddGuardGivingChase(GuardAIController guard) {
         if (!_guardsGivingChase.Contains(guard)) {
             _guardsGivingChase.Add(guard);
         }
@@ -30,7 +30,7 @@ public class GameStateManager : MonoBehaviour {
         ChangeGameState(GameState.ChaseSequence);
     }
 
-    public void RemoveGuardGivingChase(AIController guard) {
+    public void RemoveGuardGivingChase(GuardAIController guard) {
         if (_guardsGivingChase.Contains(guard)) {
             _guardsGivingChase.Remove(guard);
         }
@@ -57,6 +57,10 @@ public class GameStateManager : MonoBehaviour {
 
     private void Update() {
         DebugHotkeys();
+
+        if (_guardsGivingChase.Count > 0) {
+            _player.SetIsStealing(true);
+        }
     }
 
     // TEMP: INPUT FOR TESTING GAME STATE CHANGES
