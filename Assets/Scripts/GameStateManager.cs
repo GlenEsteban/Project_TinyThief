@@ -2,11 +2,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class GameStateManager : MonoBehaviour {
     public static GameStateManager Instance { get; private set; }
 
     public event Action OnPlayerCaught;
+
+    [SerializeField] private GrabAbility _player;
 
     [SerializeField] private BGMPlayer _bgmPlayer;
 
@@ -15,6 +19,8 @@ public class GameStateManager : MonoBehaviour {
     [SerializeField] private List<AIController> _guardsGivingChase = new List<AIController>();
 
     [SerializeField] private GameObject _capturedUI;
+    [SerializeField] private GameObject _gameOverUI;
+
 
     public void AddGuardGivingChase(AIController guard) {
         if (!_guardsGivingChase.Contains(guard)) {
@@ -87,11 +93,15 @@ public class GameStateManager : MonoBehaviour {
     private void RunMainGameplay() {
         if (_bgmPlayer == null) { return; }
 
+        _player.SetIsStealing(false);
+
         _bgmPlayer.PlayBGMMain();
     }
 
     private void RunChaseSequence() {
         if (_bgmPlayer == null) { return; }
+
+        _player.SetIsStealing(true);
 
         _bgmPlayer.PlayBGMChaseSequence();
     }
@@ -106,11 +116,18 @@ public class GameStateManager : MonoBehaviour {
         yield return new WaitForSeconds(2);
 
         _capturedUI.SetActive(true);
+
         _sceneSFX.PlayBGMCaughtSFX();
 
         yield return new WaitForSeconds(1);
 
         _bgmPlayer.PlayBGMGameOver();
+
+        yield return new WaitForSeconds(1);
+        
+        Cursor.visible = true;
+
+        _gameOverUI.SetActive(true);
     }
 }
 public enum GameState {

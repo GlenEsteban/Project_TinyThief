@@ -23,6 +23,10 @@ public class Movement : MonoBehaviour {
         _moveDirection = _followCamera.TransformDirection(_moveDirection);
     }
 
+    public void SetLookRotationSpeed(float speed) {
+        _lookRotationSpeed = speed;
+    }
+
     public void Start() {
         _rigidBody = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();

@@ -21,7 +21,6 @@ public class AIController : MonoBehaviour {
     [SerializeField] private float _surveyingRange = 5f;
     [SerializeField] private Transform _surveyingPoint;
     [SerializeField] private float _surveyingDuration = 15f;
-
     
     private GuardSFX _guardSFX;
     private AIMovement _aiMovement;
@@ -31,6 +30,7 @@ public class AIController : MonoBehaviour {
     public bool _isInFOVRangeThreshold = false;
     public bool _isFOVObstructed = false;
     public bool _canSeePlayer = false;
+    public bool _isInControl = true;
 
     public bool _isPatrolling = true;
     public bool _hasReachedPatrolpoint = true;
@@ -43,12 +43,14 @@ public class AIController : MonoBehaviour {
     private float _surveyingTimer = 0;
     private float _surveyingDurationTimer = 0;
 
-
     private Vector3 _pointLastSeenPlayer;
     private float _distanceToPlayer;
     private Vector3 _directionToPlayer;
     private Vector3 _currentPatrolPoint;
 
+    public void DisableControls() {
+        _isInControl = false;
+    }
 
     private void Awake() {
         _guardSFX = GetComponent<GuardSFX>();
@@ -65,13 +67,18 @@ public class AIController : MonoBehaviour {
 
         _emoteUI = GetComponent<EmoteUI>();
         _emoteUI.HideEmoteUI();
+
+        GameStateManager.Instance.OnPlayerCaught += DisableControls;
     }
 
     private void Update() {
+        if (!_isInControl) { return; }
         if (_isChasing) {
             
             if (_distanceToPlayer < 2f) {
                 _isChasing = false;
+                _isInControl = false;
+
                 GameStateManager.Instance.ChangeGameState(GameState.GameOver);
             } else {
                 HandleChaseBehavior();

@@ -32,8 +32,4 @@ public class GrabbableItem: MonoBehaviour{
     public void ShowGrabIndicator() {
         _grabIndicator.gameObject.SetActive(true);
     }
-
-    private void Awake() {
-        //_grabIndicator = GetComponentInChildren<Canvas>();
-    }
 }

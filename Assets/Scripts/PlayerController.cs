@@ -55,9 +55,12 @@ public class PlayerController : MonoBehaviour {
         GameStateManager.Instance.OnPlayerCaught += HandlePlayerCaught;
 
         _grabAbility.OnGrabItem += HandleDisableControlTemporarily;
+
+        Cursor.visible = false;
     }
 
     private void Update() {
+
         if (!_isPlayerInControl) { return; }
 
         if (_isMoving) {
@@ -86,6 +89,14 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Look(InputAction.CallbackContext context) {
+
+        if (context.control.device is Mouse) {
+            _movement.SetLookRotationSpeed(5);
+        }
+        else if (context.control.device is Gamepad) {
+            _movement.SetLookRotationSpeed(100);
+        }
+
         if (!_isPlayerInControl) { return; }
 
         if (context.phase == InputActionPhase.Performed) {

@@ -9,11 +9,17 @@ public class GrabAbility : MonoBehaviour {
     [SerializeField] GrabbableItemDetector _pickupGroundDetector;
     [SerializeField] GrabbableItemDetector _pickupFrontDetector;
     [SerializeField] Transform _inventory;
+    [SerializeField] CoinCounter _coinCounter;
 
     private Animation _animation;
     private RogueSFX _rogueSFX;
 
     [SerializeField] bool _isStealing = false;
+
+    public void SetIsStealing(bool state) {
+        StopAllCoroutines();
+        _isStealing = state;
+    }
 
     public bool GetIsStealing() {
         return _isStealing;
@@ -38,6 +44,7 @@ public class GrabAbility : MonoBehaviour {
         else if (_pickupGroundDetector.GetFirstGrabbableItem() != null) {
             GrabbableItem item = _pickupGroundDetector.GetFirstGrabbableItem();
             AddToInventory(item);
+            _coinCounter.AddToCoinCount(item.GetValue());
 
             _pickupFrontDetector.RemoveItem(item);
             _pickupGroundDetector.RemoveItem(item);

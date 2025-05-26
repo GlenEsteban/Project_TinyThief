@@ -31,6 +31,7 @@ public class AIMovement : MonoBehaviour {
 
     private void Start() {
         _targetDestination = transform.position;
+        _navMeshAgent.speed = _moveSpeed;
     }
 
     private void Update() { 
@@ -50,8 +51,8 @@ public class AIMovement : MonoBehaviour {
             else {
                 targetDirection = _navMeshAgent.velocity.normalized;
             }
-            Quaternion toRotation = Quaternion.LookRotation(targetDirection, Vector3.up);
-            transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, _moveRotationSpeed * Time.deltaTime);
+            //Quaternion toRotation = Quaternion.LookRotation(targetDirection, Vector3.up);
+            //transform.rotation = Quaternion.Slerp(transform.rotation, toRotation, _moveRotationSpeed * Time.deltaTime);
         }
     }
 }

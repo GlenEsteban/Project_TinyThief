@@ -26,7 +26,6 @@ public class RogueSFX : MonoBehaviour {
     }
     public void PlayCaughtSFX() {
         _audioSource.pitch =  1.2f;
-        _audioSource.clip = _caughtSFX;
-        _audioSource.Play();
+        _audioSource.PlayOneShot(_caughtSFX);
     }
 }
