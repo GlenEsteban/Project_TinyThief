@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour {
     private PlayerInput _playerInput;
     private Movement _movement;
     private GrabAbility _grabAbility;
+    private EmoteUI _emoteUI;
 
     private Vector2 _moveDirection;
     private Vector2 _lookDirection;
@@ -20,10 +21,6 @@ public class PlayerController : MonoBehaviour {
 
         _moveDirection = Vector2.zero;
         _movement.SetMoveDirection(_moveDirection);
-    }
-
-    public void Start() {
-        _grabAbility.OnGrabItem += HandleDisableControlTemporarily;
     }
 
     private void OnEnable() {
@@ -51,6 +48,13 @@ public class PlayerController : MonoBehaviour {
         _playerInput = new PlayerInput();
         _movement = GetComponent<Movement>();
         _grabAbility = GetComponent<GrabAbility>();
+        _emoteUI = GetComponent<EmoteUI>();
+    }
+
+    private void Start() {
+        GameStateManager.Instance.OnPlayerCaught += HandlePlayerCaught;
+
+        _grabAbility.OnGrabItem += HandleDisableControlTemporarily;
     }
 
     private void Update() {
@@ -105,5 +109,16 @@ public class PlayerController : MonoBehaviour {
         _isPlayerInControl = false;
         yield return new WaitForSeconds(seconds);
         _isPlayerInControl = true;
+    }
+
+    private void HandlePlayerCaught() {
+        DisableControls();
+
+        _emoteUI.DisplayAlertEmote();
+    }
+
+    private void DisableControls() {
+        _isPlayerInControl = false;
+        _movement.StopMovement();
     }
 }

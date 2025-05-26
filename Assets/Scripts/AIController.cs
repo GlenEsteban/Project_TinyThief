@@ -45,6 +45,7 @@ public class AIController : MonoBehaviour {
 
 
     private Vector3 _pointLastSeenPlayer;
+    private float _distanceToPlayer;
     private Vector3 _directionToPlayer;
     private Vector3 _currentPatrolPoint;
 
@@ -67,15 +68,23 @@ public class AIController : MonoBehaviour {
     }
 
     private void Update() {
-        if (_isPatrolling) {
+        if (_isChasing) {
+            
+            if (_distanceToPlayer < 2f) {
+                _isChasing = false;
+                GameStateManager.Instance.ChangeGameState(GameState.GameOver);
+            } else {
+                HandleChaseBehavior();
+            }
+        }
+        else if (_isPatrolling) {
             HandlePatrollingBehavior();
         }
 
-        if (_isChasing) {
-            HandleChaseBehavior();
-        }
-
         CheckIfPlayerInFOVDistance();
+
+        if (!_isInFOVDistance) { return; } 
+
         CheckIfPlayerInFOVRangeThreshold();
         CheckForFOVObstruction();
 
@@ -94,9 +103,9 @@ public class AIController : MonoBehaviour {
     }
 
     private void CheckIfPlayerInFOVDistance() {
-        float distanceToPlayer = (_player.transform.position - transform.position).magnitude;
+        _distanceToPlayer = (_player.transform.position - transform.position).magnitude;
 
-        if (distanceToPlayer < _fovDistance) {
+        if (_distanceToPlayer < _fovDistance) {
             _isInFOVDistance = true;
         }
         else {
@@ -141,7 +150,7 @@ public class AIController : MonoBehaviour {
 
             if (!_isChasing && _player.GetIsStealing()) {
                 _isPatrolling = false;
-                _emoteUI.DisplayChaseEmote();
+                _emoteUI.DisplayAlertEmote();
 
                 _guardSFX.PlayAlertSFX();
 
@@ -160,7 +169,7 @@ public class AIController : MonoBehaviour {
 
     private void HandleChaseBehavior() {
         if (_canSeePlayer) {
-            _emoteUI.DisplayChaseEmote();
+            _emoteUI.DisplayAlertEmote();
 
             _aiMovement.SetTargetDestination(_player.gameObject.transform.position);
 
@@ -171,7 +180,7 @@ public class AIController : MonoBehaviour {
             _surveyingDurationTimer = 0;
         }
         else {
-            _emoteUI.DisplaySurveyingEmote();
+            _emoteUI.DisplayConfusedEmote();
 
             _isSurveying = true;
 

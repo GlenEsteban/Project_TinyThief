@@ -6,8 +6,8 @@ using UnityEngine;
 public class GrabAbility : MonoBehaviour {
     public event Action OnGrabItem;
 
-    [SerializeField] Detector _pickupGroundDetector;
-    [SerializeField] Detector _pickupFrontDetector;
+    [SerializeField] GrabbableItemDetector _pickupGroundDetector;
+    [SerializeField] GrabbableItemDetector _pickupFrontDetector;
     [SerializeField] Transform _inventory;
 
     private Animation _animation;

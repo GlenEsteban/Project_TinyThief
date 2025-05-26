@@ -16,6 +16,8 @@ public class Movement : MonoBehaviour {
     private Animator _animator;
     private float _movementParameterValue;
 
+    private bool _isAbleToMove = true;
+
     public void SetMoveDirection(Vector2 direction) {
         _moveDirection = new Vector3(direction.x, 0, direction.y);
         _moveDirection = _followCamera.TransformDirection(_moveDirection);
@@ -26,6 +28,8 @@ public class Movement : MonoBehaviour {
         _animator = GetComponent<Animator>();
     }
     public void Update() {
+        if (!_isAbleToMove) { return; }
+
         _rigidBody.AddForce(_localGravityScale, ForceMode.Acceleration);
 
         _moveVelocity.x = _moveDirection.x * _moveSpeed;
@@ -50,5 +54,10 @@ public class Movement : MonoBehaviour {
     public void RotateFollowCam(Vector2 direction) {
         float yRotation = direction.x * _lookRotationSpeed * Time.deltaTime;
         _followCamera.Rotate(0f, yRotation, 0f);
+    }
+
+    public void StopMovement() {
+        _rigidBody.velocity = Vector3.zero;
+        _isAbleToMove = false;
     }
 }
